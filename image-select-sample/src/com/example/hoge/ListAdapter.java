@@ -24,7 +24,7 @@ public class ListAdapter extends AbstractAdapter<String> {
             tv = new TextView(super.context);
 
             tv.setLayoutParams(super.getMatchParentLayoutParams());
-            tv.setTextSize(40);
+            tv.setTextSize(30);
         }
 
         tv.setText((CharSequence)super.getItem(position));

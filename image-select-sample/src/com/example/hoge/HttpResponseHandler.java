@@ -13,6 +13,7 @@ import org.apache.http.entity.BufferedHttpEntity;
 import org.apache.http.util.EntityUtils;
 
 import android.content.Context;
+import android.content.Intent;
 
 /**
  * <p>
@@ -58,7 +59,8 @@ public class HttpResponseHandler implements ResponseHandler<HttpResponseDto> {
     }
 
     @Override
-    public HttpResponseDto handleResponse(HttpResponse response) throws ClientProtocolException, IOException {
+    public HttpResponseDto handleResponse(HttpResponse response) throws ClientProtocolException,
+            IOException {
 
         HttpResponseDto dto = new HttpResponseDto();
 
@@ -124,18 +126,44 @@ public class HttpResponseHandler implements ResponseHandler<HttpResponseDto> {
      */
     private void write(String fileName, HttpEntity entity) throws IOException {
 
-        FileOutputStream fos = this.context.openFileOutput(fileName,
-                    Context.MODE_PRIVATE);
+        FileOutputStream fos = this.context.openFileOutput(fileName, Context.MODE_PRIVATE);
         InputStream is = (new BufferedHttpEntity(entity)).getContent();
-        byte[] buffer = new byte[4096];
-        int size = 0;
 
-        while ((size = is.read(buffer)) > 0) {
-            fos.write(buffer, 0, size);
+        long contentLength = entity.getContentLength();
+        byte[] buffer = new byte[4096];
+        int readByte = 0;
+        int receiveByte = 0;
+
+        while ((readByte = is.read(buffer)) > 0) {
+
+            fos.write(buffer, 0, readByte);
+            receiveByte += readByte;
+
+            this.sendDownloadProgress(contentLength, receiveByte);
         }
 
         fos.close();
         is.close();
+    }
+
+    /**
+     * ダウンロード進捗情報を{@link HttpBroadCastReceiver}に送信します。
+     * @param contentLength
+     * @param totalSize
+     */
+    private void sendDownloadProgress(long contentLength, int receiveByte) {
+
+        int percentage = (int)(contentLength < 0 ? -1
+                : ((receiveByte * 1000) / (contentLength * 10)));
+
+        Intent intent = new Intent();
+
+        intent.putExtra("percentage", percentage);
+        intent.putExtra("receiveByte", receiveByte);
+        intent.setAction("HTTP_BROAD_CAST");
+
+        this.context.sendBroadcast(intent);
+
     }
 
 }

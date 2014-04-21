@@ -1,6 +1,5 @@
 package com.example.hoge;
 
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -15,6 +14,7 @@ import android.app.Activity;
 import android.app.LoaderManager;
 import android.app.LoaderManager.LoaderCallbacks;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.Loader;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -43,6 +43,8 @@ public class MainActivity extends Activity implements LoaderCallbacks<List<HttpR
 
     private GridView gallery;
 
+    private TextView tv;
+
     private Map<String, Bitmap> datas;
 
     private List<String> menuItems;
@@ -65,9 +67,10 @@ public class MainActivity extends Activity implements LoaderCallbacks<List<HttpR
     private OnItemClickListener menuClickListener = new OnItemClickListener() {
 
         @Override
-        public void onItemClick(android.widget.AdapterView<?> parent, android.view.View view, int position, long id) {
+        public void onItemClick(android.widget.AdapterView<?> parent, android.view.View view,
+                int position, long id) {
 
-            String key = ((TextView)view).getText().toString();
+            String key = ((TextView) view).getText().toString();
 
             if ("facebook".equals(key)) {
 
@@ -84,13 +87,12 @@ public class MainActivity extends Activity implements LoaderCallbacks<List<HttpR
         };
     };
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
 
-        this.container = (ViewGroup)getLayoutInflater().inflate(R.layout.activity_main, null);
+        this.container = (ViewGroup) getLayoutInflater().inflate(R.layout.activity_main, null);
         setContentView(this.container);
 
         this.init();
@@ -103,7 +105,8 @@ public class MainActivity extends Activity implements LoaderCallbacks<List<HttpR
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
 
-        // Inflate the menu; this adds items to the action bar isf it is present.
+        // Inflate the menu; this adds items to the action bar isf it is
+        // present.
         getMenuInflater().inflate(R.menu.main, menu);
         return true;
     }
@@ -145,7 +148,6 @@ public class MainActivity extends Activity implements LoaderCallbacks<List<HttpR
         Session.saveSession(session, outState);
     }
 
-
     private void init() {
 
         this.imageMediaManager = new ImageMediaManager(this);
@@ -159,6 +161,12 @@ public class MainActivity extends Activity implements LoaderCallbacks<List<HttpR
         this.gallery = new GridView(this);
         this.gallery.setNumColumns(3);
         this.gallery.setAdapter(new GridImageAdapter(this, this.thumbnails));
+
+        this.tv = new TextView(this);
+        HttpBroadCastReceiver receiver = new HttpBroadCastReceiver(this.tv);
+        IntentFilter filter = new IntentFilter();
+        filter.addAction("HTTP_BROAD_CAST");
+        registerReceiver(receiver, filter);
 
         this.setMenu();
     }
@@ -175,7 +183,6 @@ public class MainActivity extends Activity implements LoaderCallbacks<List<HttpR
 
         this.container.addView(this.menu);
     }
-
 
     private void createMenuItems() {
 
@@ -224,7 +231,7 @@ public class MainActivity extends Activity implements LoaderCallbacks<List<HttpR
             if (session.getState().equals(SessionState.CREATED_TOKEN_LOADED)) {
 
                 Session.OpenRequest request = new Session.OpenRequest(this).setCallback(callback);
-                request.setPermissions(new String[] {"user_photos"});
+                request.setPermissions(new String[] { "user_photos" });
                 session.openForRead(request);
             }
 
@@ -232,8 +239,6 @@ public class MainActivity extends Activity implements LoaderCallbacks<List<HttpR
     }
 
     private void setFacebookImages() {
-
-        this.container.removeAllViews();
 
         Session session = Session.getActiveSession();
 
@@ -249,10 +254,11 @@ public class MainActivity extends Activity implements LoaderCallbacks<List<HttpR
 
                     try {
 
-                        String imgUri = json.getJSONArray("data").getJSONObject(0).getString("picture");
+                        String imgUri = json.getJSONArray("data").getJSONObject(0)
+                                .getString("picture");
 
                         ArrayList<String> uris = new ArrayList<String>();
-                        for (int i = 0; i < 10; i++) {
+                        for (int i = 0; i < 100; i++) {
                             uris.add(imgUri);
                         }
                         Bundle args = new Bundle();
@@ -280,7 +286,13 @@ public class MainActivity extends Activity implements LoaderCallbacks<List<HttpR
     @Override
     public Loader<List<HttpResponseDto>> onCreateLoader(int id, Bundle args) {
 
-        HttpConnectionManager loader = new HttpConnectionManager(this, args.getStringArrayList("uris"), HttpMethod.GET);
+        this.container.removeAllViews();
+        this.container.addView(tv);
+        tv.setTextSize(20);
+        tv.setText("hogehoge");
+
+        HttpConnectionManager loader = new HttpConnectionManager(this,
+                args.getStringArrayList("uris"), HttpMethod.GET);
         loader.forceLoad();
         return loader;
     }

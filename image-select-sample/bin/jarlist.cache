@@ -1,6 +1,6 @@
 # cache for current jar dependency. DO NOT EDIT.
 # format is <lastModified> <length> <SHA-1> <path>
 # Encoding is UTF-8
-1397473131742 621451 5896b0a4e377ac4242eb2bc785220c1c4fc052f4 C:\apps\github\image-select-sample\libs\android-support-v4.jar
-1397473119601 621451 5896b0a4e377ac4242eb2bc785220c1c4fc052f4 C:\apps\github\android-support-v7-appcompat\libs\android-support-v4.jar
-1397473126601 621451 5896b0a4e377ac4242eb2bc785220c1c4fc052f4 C:\apps\github\FacebookSDK\libs\android-support-v4.jar
+1398044582201 621451 5896b0a4e377ac4242eb2bc785220c1c4fc052f4 C:\apps\github\android-sample\android-support-v7-appcompat\libs\android-support-v4.jar
+1398044582003 621451 5896b0a4e377ac4242eb2bc785220c1c4fc052f4 C:\apps\github\android-sample\image-select-sample\libs\android-support-v4.jar
+1398044581986 621451 5896b0a4e377ac4242eb2bc785220c1c4fc052f4 C:\apps\github\android-sample\FacebookSDK\libs\android-support-v4.jar

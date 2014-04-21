@@ -44,7 +44,8 @@ public class ImageMediaManager {
 
         Map<String, Bitmap> allImages = new HashMap<String, Bitmap>();
 
-        MergeCursor cursor = new MergeCursor(new Cursor[] { this.getInternal(), this.getExternal() });
+        MergeCursor cursor = new MergeCursor(
+                new Cursor[] { this.getInternal(), this.getExternal() });
 
         int count = cursor.getCount();
 
@@ -57,8 +58,9 @@ public class ImageMediaManager {
             String path = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.DATA));
 
             int id = cursor.getInt(cursor.getColumnIndex(MediaStore.Images.Media._ID));
-            Bitmap thumbmail = MediaStore.Images.Thumbnails.getThumbnail(this.context.getContentResolver(), id,
-                    MediaStore.Images.Thumbnails.MICRO_KIND, null);
+            Bitmap thumbmail = MediaStore.Images.Thumbnails.getThumbnail(
+                    this.context.getContentResolver(), id, MediaStore.Images.Thumbnails.MICRO_KIND,
+                    null);
 
             allImages.put(path, thumbmail);
         }
@@ -120,8 +122,8 @@ public class ImageMediaManager {
      */
     private Cursor getInternal() {
 
-        return this.context.getContentResolver().query(MediaStore.Images.Media.INTERNAL_CONTENT_URI, null, null, null,
-                null);
+        return this.context.getContentResolver().query(
+                MediaStore.Images.Media.INTERNAL_CONTENT_URI, null, null, null, null);
     }
 
     /**
@@ -131,7 +133,7 @@ public class ImageMediaManager {
      */
     private Cursor getExternal() {
 
-        return this.context.getContentResolver().query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, null, null, null,
-                null);
+        return this.context.getContentResolver().query(
+                MediaStore.Images.Media.EXTERNAL_CONTENT_URI, null, null, null, null);
     }
 }
