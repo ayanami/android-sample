@@ -13,6 +13,7 @@ import org.json.JSONObject;
 import android.app.Activity;
 import android.app.LoaderManager;
 import android.app.LoaderManager.LoaderCallbacks;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.Loader;
@@ -43,7 +44,7 @@ public class MainActivity extends Activity implements LoaderCallbacks<List<HttpR
 
     private GridView gallery;
 
-    private TextView tv;
+    private ProgressDialog dialog;
 
     private Map<String, Bitmap> datas;
 
@@ -162,8 +163,8 @@ public class MainActivity extends Activity implements LoaderCallbacks<List<HttpR
         this.gallery.setNumColumns(3);
         this.gallery.setAdapter(new GridImageAdapter(this, this.thumbnails));
 
-        this.tv = new TextView(this);
-        HttpBroadCastReceiver receiver = new HttpBroadCastReceiver(this.tv);
+        this.dialog = new ProgressDialog(this);
+        HttpBroadCastReceiver receiver = new HttpBroadCastReceiver(this.dialog);
         IntentFilter filter = new IntentFilter();
         filter.addAction("HTTP_BROAD_CAST");
         registerReceiver(receiver, filter);
@@ -258,7 +259,7 @@ public class MainActivity extends Activity implements LoaderCallbacks<List<HttpR
                                 .getString("picture");
 
                         ArrayList<String> uris = new ArrayList<String>();
-                        for (int i = 0; i < 100; i++) {
+                        for (int i = 0; i < 1000; i++) {
                             uris.add(imgUri);
                         }
                         Bundle args = new Bundle();
@@ -286,11 +287,6 @@ public class MainActivity extends Activity implements LoaderCallbacks<List<HttpR
     @Override
     public Loader<List<HttpResponseDto>> onCreateLoader(int id, Bundle args) {
 
-        this.container.removeAllViews();
-        this.container.addView(tv);
-        tv.setTextSize(20);
-        tv.setText("hogehoge");
-
         HttpConnectionManager loader = new HttpConnectionManager(this,
                 args.getStringArrayList("uris"), HttpMethod.GET);
         loader.forceLoad();
@@ -300,6 +296,7 @@ public class MainActivity extends Activity implements LoaderCallbacks<List<HttpR
     @Override
     public void onLoadFinished(Loader<List<HttpResponseDto>> loader, List<HttpResponseDto> data) {
 
+        this.dialog.dismiss();
         this.container.removeAllViews();
 
         try {

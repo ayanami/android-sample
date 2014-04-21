@@ -15,6 +15,7 @@ import org.apache.http.protocol.HTTP;
 
 import android.content.AsyncTaskLoader;
 import android.content.Context;
+import android.content.Intent;
 
 /**
  * <p>
@@ -104,6 +105,8 @@ public class HttpConnectionManager extends AsyncTaskLoader<List<HttpResponseDto>
 
         HttpClient httpClient = new DefaultHttpClient();
 
+        this.sendTotalReceiveCount();
+
         try {
 
             List<HttpResponseDto> dtos = new ArrayList<HttpResponseDto>();
@@ -158,6 +161,20 @@ public class HttpConnectionManager extends AsyncTaskLoader<List<HttpResponseDto>
         this.uris = uris;
         this.paramsList = paramsList;
         this.httpMethod = httpMethod;
+    }
+
+
+    /**
+     * 総受信数を{@link HttpBroadCastReceiver}に送信します。
+     */
+    private void sendTotalReceiveCount() {
+
+        Intent intent = new Intent();
+
+        intent.putExtra("totalReceiveCount", this.uris.size());
+        intent.setAction("HTTP_BROAD_CAST");
+
+        this.context.sendBroadcast(intent);
     }
 
     /**

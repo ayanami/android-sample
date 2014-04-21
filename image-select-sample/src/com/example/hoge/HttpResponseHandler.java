@@ -159,7 +159,6 @@ public class HttpResponseHandler implements ResponseHandler<HttpResponseDto> {
         Intent intent = new Intent();
 
         intent.putExtra("percentage", percentage);
-        intent.putExtra("receiveByte", receiveByte);
         intent.setAction("HTTP_BROAD_CAST");
 
         this.context.sendBroadcast(intent);
