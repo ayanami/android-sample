@@ -20,6 +20,7 @@ import android.content.Loader;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.ViewGroup;
@@ -45,6 +46,8 @@ public class MainActivity extends Activity implements LoaderCallbacks<List<HttpR
     private GridView gallery;
 
     private ProgressDialog dialog;
+
+    private TextView tv;
 
     private Map<String, Bitmap> datas;
 
@@ -76,10 +79,12 @@ public class MainActivity extends Activity implements LoaderCallbacks<List<HttpR
             if ("facebook".equals(key)) {
 
                 setFacebookImages();
+                return;
             }
 
-            if ("instagram".equals(key)) {
+            if ("github".equals(key)) {
 
+                setGithubInfo();
                 return;
             }
 
@@ -125,18 +130,6 @@ public class MainActivity extends Activity implements LoaderCallbacks<List<HttpR
     }
 
     @Override
-    public void onStart() {
-        super.onStart();
-        Session.getActiveSession().addCallback(callback);
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-        Session.getActiveSession().removeCallback(callback);
-    }
-
-    @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         Session.getActiveSession().onActivityResult(this, requestCode, resultCode, data);
@@ -163,6 +156,8 @@ public class MainActivity extends Activity implements LoaderCallbacks<List<HttpR
         this.gallery.setNumColumns(3);
         this.gallery.setAdapter(new GridImageAdapter(this, this.thumbnails));
 
+        this.tv = new TextView(this);
+
         this.dialog = new ProgressDialog(this);
         HttpBroadCastReceiver receiver = new HttpBroadCastReceiver(this.dialog);
         IntentFilter filter = new IntentFilter();
@@ -180,7 +175,7 @@ public class MainActivity extends Activity implements LoaderCallbacks<List<HttpR
 
         this.createMenuItems();
         this.menuItems.add("facebook");
-        this.menuItems.add("instagram");
+        this.menuItems.add("github");
 
         this.container.addView(this.menu);
     }
@@ -229,13 +224,6 @@ public class MainActivity extends Activity implements LoaderCallbacks<List<HttpR
 
             Session.setActiveSession(session);
 
-            if (session.getState().equals(SessionState.CREATED_TOKEN_LOADED)) {
-
-                Session.OpenRequest request = new Session.OpenRequest(this).setCallback(callback);
-                request.setPermissions(new String[] { "user_photos" });
-                session.openForRead(request);
-            }
-
         }
     }
 
@@ -258,13 +246,12 @@ public class MainActivity extends Activity implements LoaderCallbacks<List<HttpR
                         String imgUri = json.getJSONArray("data").getJSONObject(0)
                                 .getString("picture");
 
-                        ArrayList<String> uris = new ArrayList<String>();
-                        for (int i = 0; i < 1000; i++) {
+                        List<String> uris = new ArrayList<String>();
+                        for (int i = 0; i < 100; i++) {
                             uris.add(imgUri);
                         }
-                        Bundle args = new Bundle();
-                        args.putStringArrayList("uris", uris);
-                        loaderManager.initLoader(0, args, MainActivity.this);
+
+                        initLoader(uris);
 
                     } catch (JSONException e) {
                         e.printStackTrace();
@@ -276,12 +263,33 @@ public class MainActivity extends Activity implements LoaderCallbacks<List<HttpR
 
             if (!session.isClosed()) {
 
-                session.openForRead(new Session.OpenRequest(this).setCallback(callback));
+                Session.OpenRequest request = new Session.OpenRequest(this).setCallback(callback);
+                request.setPermissions(new String[] { "user_photos" });
+                session.openForRead(request);
             } else {
 
                 Session.openActiveSession(this, true, callback);
             }
         }
+    }
+
+    private void setGithubInfo() {
+
+        this.initLoader("https://api.github.com/users/ayanami");
+    }
+
+    private void initLoader(String uri) {
+
+        List<String> uris = new ArrayList<String>();
+        uris.add(uri);
+        this.initLoader(uris);
+    }
+
+    private void initLoader(List<String> uris) {
+
+        Bundle args = new Bundle();
+        args.putStringArrayList("uris", (ArrayList<String>)uris);
+        loaderManager.initLoader(0, args, MainActivity.this);
     }
 
     @Override
@@ -299,17 +307,34 @@ public class MainActivity extends Activity implements LoaderCallbacks<List<HttpR
         this.dialog.dismiss();
         this.container.removeAllViews();
 
+        boolean isFile = false;
+
         try {
             for (HttpResponseDto dto : data) {
-                File file = getFileStreamPath(dto.getFileName());
-                FileInputStream fis = new FileInputStream(file);
-                this.thumbnails.add(BitmapFactory.decodeStream(fis));
+
+                if (dto.getException() != null) {
+
+                    throw dto.getException();
+                }
+
+                if (dto.getBody() != null) {
+                    this.tv.setText(dto.getBody());
+                } else {
+                    isFile = true;
+                    File file = getFileStreamPath(dto.getFileName());
+                    FileInputStream fis = new FileInputStream(file);
+                    this.thumbnails.add(BitmapFactory.decodeStream(fis));
+                }
             }
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
+            Log.d("hoge", e.getMessage());
         }
 
-        this.container.addView(gallery);
+        if (isFile) {
+            this.container.addView(gallery);
+        } else {
+            this.container.addView(tv);
+        }
 
     }
 

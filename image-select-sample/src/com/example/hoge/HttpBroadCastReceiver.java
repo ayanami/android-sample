@@ -75,7 +75,6 @@ public class HttpBroadCastReceiver extends BroadcastReceiver {
 
         if (percentage == 100 && this.totalReceiveCount > this.receiveCounter) {
 
-            this.dialog.setProgress(this.receiveCounter);
             this.receiveCounter++;
         }
 

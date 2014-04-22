@@ -4,6 +4,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.http.HttpStatus;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
@@ -107,24 +108,32 @@ public class HttpConnectionManager extends AsyncTaskLoader<List<HttpResponseDto>
 
         this.sendTotalReceiveCount();
 
-        try {
+        List<HttpResponseDto> dtos = new ArrayList<HttpResponseDto>();
+        HttpResponseDto dto = null;
 
-            List<HttpResponseDto> dtos = new ArrayList<HttpResponseDto>();
+        try {
 
             for (int i = 0; i < this.uris.size(); i++) {
 
-                HttpResponseDto dto = httpClient.execute(this.getRequest(this.uris.get(i), i),
+                dto = httpClient.execute(this.getRequest(this.uris.get(i), i),
                         new HttpResponseHandler(this.context, this.uris.get(i)));
 
+                if (dto.getStatusCode() != HttpStatus.SC_OK) {
+
+                    throw new Exception("StatusCode:" + String.valueOf(dto.getStatusCode()));
+                }
                 dtos.add(dto);
             }
 
-            return dtos;
         } catch (Exception e) {
 
-            e.printStackTrace();
-            return null;
+            if (dto == null) {
+                dto = new HttpResponseDto();
+            }
+            dto.setException(e);
+            dtos.add(dto);
         }
+        return dtos;
 
     }
 

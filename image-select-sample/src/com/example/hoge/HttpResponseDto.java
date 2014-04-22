@@ -41,6 +41,9 @@ public class HttpResponseDto {
     /** ファイル名 */
     private String fileName;
 
+    /** {@link Exception} */
+    private Exception exception;
+
     /**
      * ステータスコードを設定します。
      * @param statusCode ステータスコード
@@ -103,5 +106,21 @@ public class HttpResponseDto {
      */
     public String getFileName() {
         return this.fileName;
+    }
+
+    /**
+     * {@link Exception}を設定します。
+     * @param exception {@link Exception}
+     */
+    public void setException(Exception exception) {
+        this.exception = exception;
+    }
+
+    /**
+     * {@link Exception}を返却します。
+     * @return {@link Exception}
+     */
+    public Exception getException() {
+        return this.exception;
     }
 }
